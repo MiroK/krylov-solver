@@ -1,0 +1,13 @@
+petsc_solver shows that krylov solver works without attaching the nullspace
+as the rhs is orthogonalized
+
+scipy_solver uses krylov solver without nullspace - works only with b \perp Z.
+Also illustrates that (1-ZZ^t)A has no effect one the solution but the system
+matrix is then significantly denser.
+
+the above statements are true if x0, the intial guess for KrylovSolver is such
+that ZZ^Tx0 = 0. In case x0 has some component in the nullspace, nullspace info
+must be attached to krylov solver otherwise divergence. Petsc krylov solver
+with nullspace + AMG preconditioner with x0, ZZ^T x0 !=0, converges but the
+solution is wrong, even if the preconditioner as well as A are aware of the
+nullspace!
