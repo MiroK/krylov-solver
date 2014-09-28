@@ -124,6 +124,9 @@ def visualize_form(A, b, c):
         # solution passed through it
         cs = lambda s: x + np.array([z[1], -z[0]])*s
 
+        # Perperndicular line to cs
+        cs_perp = lambda s: x + z*s
+
         # Chi is the constrained functional whose value we want to plot
         chi = lambda x: phi(x[:2]) + x[-1]*psi(x[:2])
 
@@ -153,8 +156,76 @@ def visualize_form(A, b, c):
             PHI_cs[i] = phi(P)
 
         # Add three contour plot x, y @ a*
-        #                        x, a @ y* eval chi
+        X, Y = np.meshgrid(np.linspace(x[0]-w, x[0]+w, 100),
+                           np.linspace(x[1]-w, x[1]+w, 100))
+        PHI_a = np.zeros_like(X)
+        for i in range(PHI_a.shape[0]):
+            for j in range(PHI_a.shape[1]):
+                P = np.array([X[i, j], Y[i, j], lmbda])
+                PHI_a[i, j] = chi(P)
+
+        plt.figure()
+        plt.suptitle('lambda constant')
+        plt.pcolor(X, Y, PHI_a)
+        plt.contour(X, Y, PHI_a, 10, colors='k')
+        plt.plot(x[0], x[1], 'rx')
+
+        # #                        x, a @ y* eval chi
+        X, LMBDA = np.meshgrid(np.linspace(x[0]-w, x[0]+w, 100),
+                               np.linspace(lmbda-w, lmbda+w, 100))
+        PHI_y = np.zeros_like(X)
+        for i in range(PHI_y.shape[0]):
+            for j in range(PHI_y.shape[1]):
+                P = np.array([X[i, j], x[1], LMBDA[i, j]])
+                PHI_y[i, j] = chi(P)
+
+        plt.figure()
+        plt.suptitle('x[1] constant')
+        plt.pcolor(X, LMBDA, PHI_y)
+        plt.contour(X, LMBDA, PHI_y, 10, colors='k')
+        plt.plot(x[0], lmbda, 'rx')
+
         #                        y, a @ x*
+        Y, LMBDA = np.meshgrid(np.linspace(x[1]-w, x[1]+w, 100),
+                               np.linspace(lmbda-w, lmbda+w, 100))
+        PHI_x = np.zeros_like(Y)
+        for i in range(PHI_x.shape[0]):
+            for j in range(PHI_x.shape[1]):
+                P = np.array([x[0], Y[i, j], LMBDA[i, j]])
+                PHI_x[i, j] = chi(P)
+
+        plt.figure()
+        plt.suptitle('x[0] constant')
+        plt.pcolor(Y, LMBDA, PHI_x)
+        plt.contour(Y, LMBDA, PHI_x, 10, colors='k')
+        plt.plot(x[1], lmbda, 'rx')
+
+        # Slice through selected nullspace line and perpr to it
+        s = np.linspace(-2, 2, 100)
+        S, T = np.meshgrid(s, s)
+        Z = np.zeros_like(S)
+        Z_perp = np.zeros_like(S)
+        for i in range(len(s)):
+            for j in range(len(s)):
+                P = np.r_[cs(s[j]), lmbda+s[i]]
+                # print P, psi(cs(s[j])), phi(cs(s[j])), chi(cs(s[j]))
+                # On the line phi is chi!
+                Z[i, j] = chi(P)
+
+                P = np.r_[cs_perp(s[j]), lmbda+s[i]]
+                Z_perp[i, j] = chi(P)
+
+        plt.figure()
+        plt.suptitle('Nullspace slice')
+        pcolor = plt.pcolor(S, T, Z)
+        plt.colorbar(pcolor)
+        plt.contour(S, T, Z, 10, colors='k')
+
+        plt.figure()
+        plt.suptitle('Nullspace perp. slice')
+        plt.pcolor(S, T, Z_perp)
+        plt.contour(S, T, Z_perp, 10, colors='k')
+
 
     print 'Potential extremum', x
 
@@ -251,6 +322,7 @@ if __name__ == '__main__':
     A_skew = np.array([[0, 1], [-1, 0]])
     A_general = np.array([[3, 2], [2, 6]])
     A_0 = np.array([[1, 0], [0, 0]])
+    A_00 = np.array([[1, 2], [2, 4]])
 
     b = np.array([2, -8])
     c = 0
