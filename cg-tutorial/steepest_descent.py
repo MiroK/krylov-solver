@@ -50,7 +50,7 @@ def solve(A, b, x0=None, eps=1E-12, iter_max=1000, history=False):
             x0_history.append(x0)
 
         if n_iters % 50 == 0:
-            r = b - alpha*A.dot(x0)
+            r = b - A.dot(x0)
         else:
             r = r - alpha*q
 
